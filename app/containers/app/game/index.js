@@ -4,12 +4,14 @@ import Matter from 'matter-js';
 import { AudioPlayer, Loop, Stage, World } from 'react-game-kit';
 
 import { goToPreviousAppStep } from '../../../actions/app';
-import { onTick, goToNextGameStep } from '../../../actions/game';
+import { requestNextAction, playAction, onTick, goToNextGameStep } from '../../../actions/game';
 import { fire, move, setShield } from '../../../actions/hero';
 
 import Level from '../../../components/level';
 import Hero from '../../../components/characters/hero';
 import Laser from '../../../components/characters/laser';
+
+import { getNextAction } from '../../../reducers/editor';
 
 const MAX_TICKS = 100;
 
@@ -58,7 +60,11 @@ class GameContainer extends PureComponent {
         };
 
         this.update = this.update.bind(this);
-        // this._onCollision = this._onCollision.bind(this);
+        // this.playAction = throttle(this.playAction.bind(this), 1000);
+        //
+        // if (props.nextAction) {
+        //     this.playAction(props.nextAction);
+        // }
     }
 
     componentDidMount() {
@@ -75,26 +81,16 @@ class GameContainer extends PureComponent {
         cancelAnimationFrame(this.animationFrame);
     }
 
-    // _onCollision(key) {
-    //     console.log('_onCollision 1');
-    //
-    //     return () => {
-    //         console.log('_onCollision 2');
-    //         const bullets = { ...this.state.bullets };
-    //         delete bullets[key];
-    //         console.log('bullets: ', bullets);
-    //
-    //         this.setState({
-    //             bullets
-    //         });
-    //     };
-    // }
-
     update() {
         const tick = (this.state.tick + 1) % MAX_TICKS;
 
         this.setState({ tick });
         this.props.onTick();
+
+        if (tick % 2 === 0) {
+            this.props.playAction(this.props.nextAction);
+        }
+
         this.animationFrame = requestAnimationFrame(this.update);
     }
 
@@ -105,6 +101,7 @@ class GameContainer extends PureComponent {
                     <World onInit={physicsInit}>
                         <Level tick={this.state.tick} />
                         <Hero
+                            heroState={this.props.heroState}
                             heroPosition={this.props.heroPosition}
                             isShieldActivated={this.props.isShieldActivated}
                             onMove={this.props.move}
@@ -129,25 +126,36 @@ GameContainer.propTypes = {
     gameStep: PropTypes.number.isRequired,
     bullets: PropTypes.object.isRequired,
     isShieldActivated: PropTypes.bool.isRequired,
+
+    heroState: PropTypes.number.isRequired,
     heroPosition: PropTypes.object.isRequired,
     goToNextGameStep: PropTypes.func.isRequired,
     goToPreviousAppStep: PropTypes.func.isRequired,
     move: PropTypes.func.isRequired,
     fire: PropTypes.func.isRequired,
     setShield: PropTypes.func.isRequired,
+
+    playAction: PropTypes.func.isRequired,
+    requestNextAction: PropTypes.func.isRequired,
+    nextAction: PropTypes.object,
+
     onTick: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
+    nextAction: getNextAction(state),
     bullets: state.bullets.bullets,
     gameStep: state.game.gameStep,
     isShieldActivated: state.hero.isShieldActivated,
+    heroState: state.hero.heroState,
     heroPosition: state.hero.position
 });
 
 export default connect(mapStateToProps, {
     goToPreviousAppStep,
     goToNextGameStep,
+    requestNextAction,
+    playAction,
     move,
     fire,
     setShield,

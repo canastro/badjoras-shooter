@@ -8,28 +8,42 @@ export default class Editor extends PureComponent {
     constructor(props) {
         super(props);
 
-        this.handleKeyPress = this.handleKeyPress.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
     }
 
-    componentDidMount() {
-        window.addEventListener('keypress', this.handleKeyPress);
-    }
-
-    componentWillUnmount() {
-        window.removeEventListener('keypress', this.handleKeyPress);
-    }
-
-    handleKeyPress(e) {
-        if (e.keyCode === 13) {
-            this.props.onNext();
-        }
+    handleSubmit(e) {
+        e.preventDefault();
+        this.props.onSubmit(this.textarea.value);
     }
 
     render() {
+        const value = `
+            MOVE_LEFT();
+            MOVE_LEFT();
+            MOVE_LEFT();
+            MOVE_LEFT();
+            MOVE_RIGHT();
+            MOVE_RIGHT();
+            MOVE_RIGHT();
+            MOVE_RIGHT();
+        `;
+
         return (
             <div className="editor-container">
                 <div className="editor-area">
                     <strong>Algorithm</strong>
+                    <form onSubmit={this.handleSubmit}>
+                        <textarea
+                            ref={(node) => { this.textarea = node; }}
+                            id="algo"
+                            name="algo"
+                            value={value}
+                            rows={30}
+                        />
+                        <input type="submit" value="Submit" />
+                    </form>
+
+                    <button onClick={this.props.onNext}>Play</button>
                 </div>
                 <Controls />
             </div>
@@ -38,5 +52,6 @@ export default class Editor extends PureComponent {
 }
 
 Editor.propTypes = {
+    onSubmit: PropTypes.func.isRequired,
     onNext: PropTypes.func.isRequired
 };

@@ -4,12 +4,14 @@ import { connect } from 'react-redux';
 import { goToNextAppStep } from '../../../actions/app';
 
 import Intro from '../../../components/intro';
+import EditorContainer from '../editor';
 import GameContainer from '../game';
 
 class Presentation extends PureComponent {
     render() {
         this.gameStates = [
             <Intro onStart={this.props.goToNextAppStep} />,
+            <EditorContainer />,
             <GameContainer />
         ];
 

@@ -14,10 +14,6 @@ export default class Hero extends PureComponent {
 
         this.canShoot = 0;
 
-        this.state = {
-            playerState: 0
-        };
-
         this.keys = new KeyListener();
 
         this.update = throttle(20, true, this.update).bind(this);
@@ -109,41 +105,28 @@ export default class Hero extends PureComponent {
 
             this.props.onSetShield(true);
 
-            setTimeout(() => {
-                this.props.onSetShield(false);
-            }, 5000);
+            setTimeout(() => { this.props.onSetShield(false); }, 5000);
         }
 
         if (this.keys.isDown(this.keys.SPACE)) {
             this.onFire();
         }
 
-        let playerState = 0;
         if (this.keys.isDown(this.keys.LEFT) || gamepad.button(0, 'button 14')) {
-            playerState = 2;
             this.move(-10, 0);
         }
 
         if (this.keys.isDown(this.keys.RIGHT) || gamepad.button(0, 'button 15')) {
-            playerState = 3;
             this.move(10, 0);
         }
 
         if (this.keys.isDown(this.keys.UP) || gamepad.button(0, 'button 12')) {
-            playerState = 0;
             this.move(0, -10);
         }
 
         if (this.keys.isDown(this.keys.DOWN) || gamepad.button(0, 'button 13')) {
-            playerState = 0;
             this.move(0, 10);
         }
-
-        if (playerState === this.state.playerState) {
-            return;
-        }
-
-        this.setState({ playerState });
     }
 
     render() {
@@ -160,7 +143,7 @@ export default class Hero extends PureComponent {
                             repeat={false}
                             src="assets/v2/player-sprite.png"
                             scale={this.context.scale}
-                            state={this.state.playerState}
+                            state={this.props.heroState}
                             steps={[0, 0, 0, 0]}
                             tileHeight={75}
                             tileWidth={99}
@@ -183,6 +166,7 @@ Hero.contextTypes = {
 Hero.propTypes = {
     isShieldActivated: PropTypes.bool.isRequired,
     heroPosition: PropTypes.object.isRequired,
+    heroState: PropTypes.number.isRequired,
     onMove: PropTypes.func.isRequired,
     onFire: PropTypes.func.isRequired,
     onSetShield: PropTypes.func.isRequired
